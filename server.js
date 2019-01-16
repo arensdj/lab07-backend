@@ -14,6 +14,7 @@ app.use(cors());
 app.get('/location', searchToLatLong);
 app.get('/weather', (searchToWeather));
 app.get('/yelp', (searchToYelp));
+app.get('/movie', ())
 
 //test route
 app.get('/testing', (request,response) => {
@@ -42,8 +43,15 @@ function searchToLatLong(request, response){
     })
     .catch(error => handleError(error, response));
 }
-function Food(query,)
 
+function Food(yelpResult) {
+  console.log('The yelp result: ', yelpResult);
+  this.url = yelpResult.url;
+  this.name = yelpResult.name;
+  this.rating = yelpResult.rating;
+  this.price = yelpResult.price;
+  this.image_url = yelpResult.image_url;
+}
 
 function Weather(day) {
   this.forecast = day.summary;
@@ -68,11 +76,13 @@ function searchToWeather(request, response){
     })
     .catch(error => handleError(error, response));
 }
+
 function searchToYelp(request, response){
-  const url = `https://api.yelp.com/v3/businesses/search?term=restaurants&latitude=${req.query.data.latitude}&longitude=${req.query.data.longitude}`;
+  const url = `https://api.yelp.com/v3/businesses/search?term=restaurants&latitude=${request.query.data.latitude}&longitude=${request.query.data.longitude}`;
+  
   return superagent.get(url)
     .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
-    .then(foodResponse =>{
+    .then(foodResponse => {
       const foodReviews = foodResponse.body.businesses.map((restaurant) => {
         return new Food(restaurant);
       });
