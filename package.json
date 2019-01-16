@@ -1,0 +1,26 @@
+{
+  "name": "lab07-backend",
+  "version": "1.0.0",
+  "description": "Lab07 backend",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arensdj/lab07-backend.git"
+  },
+  "author": "Jasmin Arensdorf and Tim Schoen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/arensdj/lab07-backend/issues"
+  },
+  "homepage": "https://github.com/arensdj/lab07-backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "superagent": "^4.1.0"
+  }
+}
