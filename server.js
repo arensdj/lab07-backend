@@ -2,18 +2,16 @@
 
 const express = require('express');
 const cors = require('cors');
+const superagent = require('superagent');
 
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
-app.get('/location', (request, response) => {
-  const locationData = searchToLatLong(request.query.data);
-  response.send(locationData);
-});
+app.get('/location', searchToLatLong);
 
 app.get('/weather', (request, response) => {
   const weatherData = searchToWeather(request.query.data);
@@ -32,19 +30,30 @@ app.get('/testing', (request,response) => {
 
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
 
-//Helper Functions
-function searchToLatLong(query){
-  const geoData = require('./lab/darksky.json');
-  const location = new Location(geoData);
-  location.search_query = query;
-  console.log(location);
-  return location;
+// Error handler functions
+function handleError(error, response) {
+  console.error(error);
+  if (response) response.status(500).send('Sorry, something went wrong!');
 }
 
-function Location(data) {
-  //this.formatted_query = data.results[0].formatted_address;
-  this.latitude = Object.values(data)[0];
-  this.longitude = Object.values(data)[1];
+//Helper Functions
+function searchToLatLong(request, response){
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GEOCODE_API_KEY}`;
+
+  return superagent.get(url) 
+    .then(apiResponse => {
+      let location = new Location(request.query.data, apiResponse);
+      response.send(location);
+    })
+    .catch(error => handleError(error, response));
+}
+
+function Location(query, apiResult) {
+  this.search_query = query;
+  this.formatted_query = apiResult.body.results[0].formatted_address;
+  
+  this.latitude = apiResult.body.results[0].geometry.location.lat;
+  this.longitude = apiResult.body.results[0].geometry.location.lng;
 }
 
 function searchToWeather(query){
