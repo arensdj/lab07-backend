@@ -14,7 +14,7 @@ app.use(cors());
 app.get('/location', searchToLatLong);
 app.get('/weather', (searchToWeather));
 app.get('/yelp', (searchToYelp));
-app.get('/movie', ())
+app.get('/movies', (searchToMovies));
 
 //test route
 app.get('/testing', (request,response) => {
@@ -45,7 +45,6 @@ function searchToLatLong(request, response){
 }
 
 function Food(yelpResult) {
-  console.log('The yelp result: ', yelpResult);
   this.url = yelpResult.url;
   this.name = yelpResult.name;
   this.rating = yelpResult.rating;
@@ -53,9 +52,13 @@ function Food(yelpResult) {
   this.image_url = yelpResult.image_url;
 }
 
-function Weather(day) {
-  this.forecast = day.summary;
-  this.time = new Date(day.time * 1000).toString().slice(0, 15);
+function Movie(movieResult) {
+  this.title = movieResult.title;
+  this.released_on = movieResult.release_date;
+  this.total_votes = movieResult.vote_count;
+  this.title = movieResult.title;
+  this.image_url = movieResult.poster_path;
+  this.overview = movieResult.overview;
 }
 
 function Location(query, apiResult) {
@@ -63,6 +66,11 @@ function Location(query, apiResult) {
   this.formatted_query = apiResult.body.results[0].formatted_address;
   this.latitude = apiResult.body.results[0].geometry.location.lat;
   this.longitude = apiResult.body.results[0].geometry.location.lng;
+}
+
+function Weather(day) {
+  this.forecast = day.summary;
+  this.time = new Date(day.time * 1000).toString().slice(0, 15);
 }
 
 function searchToWeather(request, response){
@@ -75,6 +83,20 @@ function searchToWeather(request, response){
       response.send(weatherSummeries);
     })
     .catch(error => handleError(error, response));
+}
+
+function searchToMovies(request, response){
+  const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
+  
+  return superagent.get(url)
+    .then(movieResponse => {
+      // console.log('The movie response: ', movieResponse.body.results[0].title);
+      const moviesReviews = movieResponse.body.results.map((movie) => {
+        return new Movie(movie);
+      });
+      response.send(moviesReviews);
+    })
+    .catch(error => handleError(error,response));
 }
 
 function searchToYelp(request, response){
