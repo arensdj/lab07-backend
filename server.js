@@ -12,8 +12,8 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 
 app.get('/location', searchToLatLong);
-
 app.get('/weather', (searchToWeather));
+app.get('/yelp', (searchToYelp));
 
 //test route
 app.get('/testing', (request,response) => {
@@ -35,7 +35,6 @@ function handleError(error, response) {
 //Helper Functions
 function searchToLatLong(request, response){
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GEOCODE_API_KEY}`;
-
   return superagent.get(url) 
     .then(apiResponse => {
       let location = new Location(request.query.data, apiResponse);
@@ -43,18 +42,22 @@ function searchToLatLong(request, response){
     })
     .catch(error => handleError(error, response));
 }
+function Food(query,)
+
+
+function Weather(day) {
+  this.forecast = day.summary;
+  this.time = new Date(day.time * 1000).toString().slice(0, 15);
+}
 
 function Location(query, apiResult) {
- 
   this.search_query = query;
   this.formatted_query = apiResult.body.results[0].formatted_address;
-  
   this.latitude = apiResult.body.results[0].geometry.location.lat;
   this.longitude = apiResult.body.results[0].geometry.location.lng;
 }
 
 function searchToWeather(request, response){
-
   const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
   return superagent.get(url)
     .then(weatherResponse => {
@@ -65,9 +68,17 @@ function searchToWeather(request, response){
     })
     .catch(error => handleError(error, response));
 }
-
-function Weather(day) {
-  this.forecast = day.summary;
-  this.time = new Date(day.time * 1000).toString().slice(0, 15);
+function searchToYelp(request, response){
+  const url = `https://api.yelp.com/v3/businesses/search?term=restaurants&latitude=${req.query.data.latitude}&longitude=${req.query.data.longitude}`;
+  return superagent.get(url)
+    .set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+    .then(foodResponse =>{
+      const foodReviews = foodResponse.body.businesses.map((restaurant) => {
+        return new Food(restaurant);
+      });
+      response.send(foodReviews);
+    })
+    .catch(error => handleError(error,response));
 }
+
 
