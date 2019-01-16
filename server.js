@@ -13,11 +13,7 @@ app.use(cors());
 
 app.get('/location', searchToLatLong);
 
-app.get('/weather', (request, response) => {
-  const weatherData = searchToWeather(request.query.data);
-  // Entire array of weather data being sent back to client the front-end.
-  response.send(weatherData);
-});
+app.get('/weather', (searchToWeather));
 
 //test route
 app.get('/testing', (request,response) => {
@@ -49,6 +45,7 @@ function searchToLatLong(request, response){
 }
 
 function Location(query, apiResult) {
+ 
   this.search_query = query;
   this.formatted_query = apiResult.body.results[0].formatted_address;
   
@@ -56,22 +53,21 @@ function Location(query, apiResult) {
   this.longitude = apiResult.body.results[0].geometry.location.lng;
 }
 
-function searchToWeather(query){
-  const darkskyData = require('./lab/darksky.json');
-  const weatherArray = [];
+function searchToWeather(request, response){
 
-  // 
-  darkskyData.daily.data.forEach(day => {
-    // Instances of Weather object is pushed into array.
-    weatherArray.push(new Weather(day));
-  })
-  return weatherArray;
+  const url = `https://api.darksky.net/forecast/${process.env.WEATHER_API_KEY}/${request.query.data.latitude},${request.query.data.longitude}`;
+  return superagent.get(url)
+    .then(weatherResponse => {
+      const weatherSummeries = weatherResponse.body.daily.data.map(day=> {
+        return new Weather(day);
+      });
+      response.send(weatherSummeries);
+    })
+    .catch(error => handleError(error, response));
 }
 
 function Weather(day) {
   this.forecast = day.summary;
-  // The utc time is in seconds. Need to convert to milli seconds
-  // It is being stringified so you have a date format (e.g. Jan 15, 2019)
   this.time = new Date(day.time * 1000).toString().slice(0, 15);
 }
 
