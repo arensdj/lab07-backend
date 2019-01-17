@@ -57,7 +57,7 @@ function Movie(movieResult) {
   this.released_on = movieResult.release_date;
   this.total_votes = movieResult.vote_count;
   this.title = movieResult.title;
-  this.image_url = movieResult.poster_path;
+  this.image_url = 'http://image.tmdb.org/t/p/w500' + movieResult.poster_path;
   this.overview = movieResult.overview;
 }
 
