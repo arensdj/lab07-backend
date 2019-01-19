@@ -36,6 +36,7 @@ function handleError(error, response) {
 //Helper Functions
 function searchToLatLong(request, response){
   const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${request.query.data}&key=${process.env.GEOCODE_API_KEY}`;
+
   return superagent.get(url) 
     .then(apiResponse => {
       let location = new Location(request.query.data, apiResponse);
@@ -57,7 +58,7 @@ function Movie(movieResult) {
   this.released_on = movieResult.release_date;
   this.total_votes = movieResult.vote_count;
   this.title = movieResult.title;
-  this.image_url = movieResult.poster_path;
+  this.image_url = movieResult.poster_path ? `https://image.tmdb.org/t/p/w200${movieResult.poster_path}` : 'http://media.graytvinc.com/images/810*607/Movie32.jpg';
   this.overview = movieResult.overview;
 }
 
@@ -86,7 +87,9 @@ function searchToWeather(request, response){
 }
 
 function searchToMovies(request, response){
-  const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
+  // const url = `https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_API_KEY}&language=en-US&page=1`;
+
+  const url = `https://api.themoviedb.org/3/search/movie?api_key=${process.env.MOVIE_API_KEY}&query=${request.query.data.search_query}`;
   
   return superagent.get(url)
     .then(movieResponse => {
